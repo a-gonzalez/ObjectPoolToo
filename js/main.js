@@ -9,9 +9,8 @@ addEventListener("load", () =>
     screen.height = 800;
 
     const context = screen.getContext("2d");
-    const game = new Game(screen.width, screen.height);
-    //game.test(context);
-
+    const game = new Game(screen);
+    
     let previous_stamp = 0;
 
     let animate = (time_stamp) =>
@@ -25,6 +24,8 @@ addEventListener("load", () =>
 
         game.draw(context);
         game.update(delta_time);
+
+        //game.test(context);
 
         requestAnimationFrame(animate);
     };
