@@ -21,6 +21,7 @@ export default class Robot
         this.iris_distance = this.iris_radius;
         this.sclera_radius = this.radius * 0.4;
         this.sclera_distance = this.sclera_radius;
+        this.tracking = false;
         this.frame_x = 0;
         this.frame_y = 0;
         this.frame_max = 75;
@@ -45,7 +46,13 @@ export default class Robot
             this.point.x = event.offsetX;
             this.point.y = event.offsetY;
 
+            this.tracking = true;
             //console.log(this.angle);
+        });
+
+        this.canvas.addEventListener("mouseleave", (event) =>
+        {
+            this.tracking = false;
         });
     }
 
@@ -72,29 +79,45 @@ export default class Robot
         context.arc(this.x + Math.cos(this.angle) * this.radius * 0.62, this.y + Math.sin(this.angle) * this.radius * 0.62, this.radius * 0.2, 0, Math.PI * 2);
         context.stroke();*/
         context.drawImage(this.reflection, this.x - this.reflection.width * 0.5, this.y - this.reflection.height * 0.5);
+
+        if (this.tracking)
+        {
+            context.drawImage(this.light, this.x - this.light.width * 0.5, this.y - this.light.height * 0.5 - 195);
+        }
     }
 
     update(delta_time)
-    { // animation
-        this.frame_x >= this.frame_max ? this.frame_x = 0 : ++this.frame_x;
-
+    { // angle, distance
         const dx = this.point.x - this.x;
         const dy = this.point.y - this.y;
 
         const distance = Math.hypot(dx, dy);
 
-        if (distance <= this.sclera_distance * 2)
+        this.angle = Math.atan2(dy, dx);
+
+        if (distance <= this.sclera_distance * 2.5)
         {
             this.sclera_radius = distance * 0.4;
             this.iris_radius = distance * 0.65;
         }
-
-        this.angle = Math.atan2(dy, dx);
-        this.movement_angle += 0.005;
+        else if (this.tracking)
+        {
+            this.sclera_radius = this.sclera_distance;
+            this.iris_radius = this.iris_distance;
+        }
+        else
+        {
+            this.sclera_radius = this.sclera_distance * Math.cos(this.movement_angle);
+            this.iris_radius = this.iris_distance * Math.cos(this.movement_angle);
+        }
         /*this.x = this.centerX + Math.cos(this.movement_angle) * 50;
         this.y = this.centerY + Math.sin(this.movement_angle) * 70;*/
         this.x = this.centerX + Math.cos(this.movement_angle * 3) * 30;
         this.y = this.centerY + Math.sin(this.movement_angle * 0.5) * 160;
+        // animation
+        this.frame_x >= this.frame_max ? this.frame_x = 0 : ++this.frame_x;
+        // movement
+        this.movement_angle += 0.005;
 
         if (this.movement_angle > Math.PI * 4)
         {
